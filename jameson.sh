@@ -1,4 +1,8 @@
 #! /bin/bash
+##==========================================
+## Jameson, the friendly helper for Hugo
+##
+##  written by jabossu under GPL3
 
 echo "
    oooo                                                                      
@@ -14,6 +18,9 @@ echo "
 version="1.0"
 curdir=`pwd`
 
+##==========================================
+## Configuration steps
+##==========================================
 # Reading config file
 configFile="$HOME/.config/jameson.conf"
 [[ -f $configFile ]] || echo " * Error : config file doesn't exist." || exit 1
@@ -22,11 +29,22 @@ configFile="$HOME/.config/jameson.conf"
 editor="$(grep editor $configFile | cut -d = -f 2)" 
 [[ -x $editor ]] || echo " * Editor not set in config file. Using Nano" || editor='nano'
 
+# Setting root directory and checking if it exists
 root="$(grep root $configFile | cut -d = -f 2)"
 [[ -d $root ]] || echo " * Root directory set incorrectly in config file. Cannot run." || exit 3
 
+# Setting main branch to publish to
+mainbranch="$(grep mainbranch $configFile | cut -d = -f 2)" 
+[[ -z "$mainbranch" ]] && echo " * Production branch unset in config. Using main" && mainbranch=main
+
+# Setting working branch branch to commit to
+workingbranch="$(grep workingbranch $configFile | cut -d = -f 2)" 
+[[ -z "$workingbranch" ]] && echo " * Working branch unset in config. Using main" && workingbranch=main
 
 
+##==========================================
+## Starting for real now
+##==========================================
 cd "$root"
 
 case $1 in

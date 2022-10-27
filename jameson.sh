@@ -118,23 +118,25 @@ case $1 in
         rm "$inputFile" "$2" # discard the original and copy we made
     ;;
         
-    # Edits a post
+# Edits a post
     edit)
         echo " * Opening editor..."
         fd $2 content/ -x $editor {}
     ;;
-        
+
+# Create a new post and open it in the text editor
     new)
-        if [[ "$2" =~ "/" ]];
+        if [[ "$2" =~ *"/"* ]];
         then
             kind=$(echo "$2" | awk -F/ '{print $1}')
-            hugo new posts/$2.md --kind $kind
+            hugo new "posts/$2.md" --kind "$kind"
         else
-            hugo new posts/$2.md
+            hugo new "posts/$2.md"
         fi
-        $editor content/posts/$2.md
+        $editor "content/posts/$2.md"
     ;;
-    
+
+# Run hugo local server
     work)
         hugo server -D
     ;;

@@ -4,6 +4,7 @@
 ##
 ##  written by jabossu under GPL3
 
+version="1.0"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -15,7 +16,6 @@ echo "
 \`Y888P                                                                       v$version
 "
 
-version="1.0"
 curdir=`pwd`
 
 ##==========================================
@@ -39,7 +39,7 @@ mainbranch="$(grep mainbranch $configFile | cut -d = -f 2)"
 
 # Setting working branch branch to commit to
 workingbranch="$(grep workingbranch $configFile | cut -d = -f 2)" 
-[[ -z "$workingbranch" ]] && echo " * Working branch unset in config. Using main" && workingbranch=main
+[[ -z "$workingbranch" ]] && echo " * Working branch unset in config. Using main" && workingbranch=writting
 
 
 ##==========================================
@@ -49,25 +49,24 @@ cd "$root"
 
 case $1 in
     
-    #Save the curent branch and push it
+    #Save the current branch and push it
     save)
         # hugo -D
-        git pull
-	    git add .
-	    git commit
-	    git push
-	    if [[ $2 == "publish" ]];
-	    then
-	        jameson publish
-        fi
+	pull
+	git add .
+	git commit
+	git push
+
+	# if "jameson save publish" was used, publish next
+	[[ $2 == "publish" ]] && jameson publish
     ;;
 
     # Merge with the main branch and push changes. Updates the website
     publish)
-        git checkout main
-        git merge writting
+        git checkout $mainbranch
+        git merge $workingbranch
         git push
-        git checkout writting
+        git checkout $workingbranch
         echo "Changes published"
     ;;
     

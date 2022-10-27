@@ -71,7 +71,8 @@ case $1 in
         echo "Changes published"
     ;;
     
-    #Import a picture to the picture folder
+# Import a picture into the project picture folder
+	# option : -k to keep source file
     import)
         cd $curdir #we need to stay where the command was run from
         
@@ -113,7 +114,7 @@ case $1 in
         
         echo -n " * "
         cp -v "$inputFile" "$root/static/img/pictures/$outputFile"
-        echo "/img/pictures/$outputFile" | xclip -sel clip && echo " * image location copied to clipboard"
+        echo -n "/img/pictures/$outputFile" | xclip -sel clip && echo " * image location copied to clipboard"
         
         rm "$inputFile" "$2" # discard the original and copy we made
     ;;

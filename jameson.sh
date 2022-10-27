@@ -1,6 +1,7 @@
 #! /bin/bash
 ##==========================================
 ## Jameson, the friendly helper for Hugo
+## (named after J. Jonah Jameson)
 ##
 ##  written by jabossu under GPL3
 

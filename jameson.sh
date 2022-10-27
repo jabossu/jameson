@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.0"
+version="1.1"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -121,7 +121,7 @@ case $1 in
 # Edits a post
     edit)
         echo " * Opening editor..."
-        fd $2 content/ -x $editor {}
+        fd "$2" content/ -x $editor {}
     ;;
 
 # Create a new post and open it in the text editor

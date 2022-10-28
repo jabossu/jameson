@@ -53,7 +53,7 @@ case $1 in
     #Save the current branch and push it
     save)
         # hugo -D
-	pull
+	git pull
 	git add .
 	git commit
 	git push
@@ -127,10 +127,18 @@ case $1 in
 
 # Create a new post and open it in the text editor
     new)
-        if [[ "$2" =~ *"/"* ]];
+        if [[ "$2" =~ "/" ]];
         then
             kind=$(echo "$2" | awk -F/ '{print $1}')
-            hugo new "posts/$2.md" --kind "$kind"
+            if [[ -f "archetypes/$kind.md" ]];
+            then
+                echo " * create new post as $kind"
+                hugo new "posts/$2.md" --kind "$kind"
+            else
+                echo " * archetype '$kind' does not exist"
+                echo "   avaiable archetypes are:"
+                ls archetypes
+            fi
         else
             hugo new "posts/$2.md"
         fi

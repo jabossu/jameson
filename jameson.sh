@@ -22,17 +22,30 @@ curdir=`pwd`
 ##==========================================
 ## Configuration steps
 ##==========================================
+
 # Reading config file
 configFile="$HOME/.config/jameson.conf"
-[[ -f $configFile ]] || echo " * Error : config file doesn't exist." || exit 1
+if [[ ! -f $configFile ]];
+then
+    echo " * Error : config file doesn't exist."
+    exit 1
+fi
 
 # Setting editor. Nano is the default
 editor="$(grep editor $configFile | cut -d = -f 2)" 
-[[ -x $editor ]] || echo " * Editor not set in config file. Using Nano" || editor='nano'
+if [[ ! -x $editor ]];
+then
+    echo " * Editor not set in config file. Using Nano"
+    editor='nano'
+fi
 
 # Setting root directory and checking if it exists
 root="$(grep root $configFile | cut -d = -f 2)"
-[[ -d $root ]] || echo " * Root directory set incorrectly in config file. Cannot run." || exit 3
+if [[ ! -d $root ]];
+then
+    echo " * Root directory set incorrectly in config file. Cannot run."
+    exit 3
+fi    
 
 # Setting main branch to publish to
 mainbranch="$(grep mainbranch $configFile | cut -d = -f 2)" 

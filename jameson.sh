@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.1"
+version="1.1.3"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -33,9 +33,9 @@ fi
 
 # Setting editor. Nano is the default
 editor="$(grep editor $configFile | cut -d = -f 2)" 
-if [[ ! -x $editor ]];
+if [[ ! -x "$(command -v $editor)" ]];
 then
-    echo " * Editor not set in config file. Using Nano"
+    echo " * Editor $editor not set in config file. Using Nano"
     editor='nano'
 fi
 

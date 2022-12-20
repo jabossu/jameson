@@ -93,6 +93,7 @@ case $1 in
         then
             echo " * Convert image to WEBP"
             convert "$2" "$inputFile.webp"
+            convert "$2" -resize 300x500 "$inputFile-thumb.webp"
             oldsize=$(ls -lh "$2" | awk '{print  $5}')
             newsize=$(ls -lh "$inputFile".webp | awk '{print  $5}')
             echo " * file size : old=$oldsize ; new=$newsize"
@@ -100,8 +101,8 @@ case $1 in
             # Create a copy to work safely
             cp "$2" "$inputFile.webp"
         fi
-        # give back an extension so we can work more easily
-        inputFile="$inputFile.webp"
+        # create thumbnail
+        convert "$2" -resize 300x500 "$inputFile-thumb.webp"
         
         # Check if the output should have another filename
         if [[ -v 3 ]];
@@ -113,10 +114,11 @@ case $1 in
         outputFile="$(echo $outputFile | sed -r 's/([0-9. -]+)-/ -/g' )"
         
         echo -n " * "
-        cp -v "$inputFile" "$root/static/img/pictures/$outputFile"
-        echo -n "/img/pictures/$outputFile" | xclip -sel clip && echo " * image location copied to clipboard"
+        cp -v "$inputFile.webp" "$root/static/img/pictures/$outputFile.webp"
+        cp -v "$inputFile-thumb.webp" "$root/static/img/pictures/$outputFile-thumb.webp"
+        echo -n "/img/pictures/$outputFile.webp" | xclip -sel clip && echo " * image location copied to clipboard"
         
-        rm "$inputFile" "$2" # discard the original and copy we made
+        rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made
     ;;
         
 # Edits a post

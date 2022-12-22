@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.1.3"
+version="1.1.5"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -163,6 +163,35 @@ case $1 in
 # Run hugo local server
     work)
         hugo server -D
+    ;;
+
+# List drafts
+    drafts)
+        echo "The following posts are still drafted :"
+        grep "draft: true" content/  -r | sed -z 's/content\// * /g' | cut -d ':' -f 1 
+    ;;
+
+# Help
+    help)
+        echo "syntax: jameson <command> <arguments>
+        
+        General commands
+         - help                 : this help
+         
+        Manage posts
+         - new <title>
+           new archetype/title
+                                  create a new post title.md
+         - work                 : run hugo localhost server
+         - edit <title>         : open post in editor
+         - drafts               : list drafted posts
+         
+        Writting and content management tools
+         - import <imagefile>   : convert image to WEBP and import it to the image folder
+         - save                 : save changes 
+         - publish              : publish changes to main git branch
+         - save publish         : save changes, then merges branch to main branch
+         "
     ;;
     
 esac

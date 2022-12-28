@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.1.5"
+version="1.2"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -49,39 +49,55 @@ fi
 
 # Setting main branch to publish to
 mainbranch="$(grep mainbranch $configFile | cut -d = -f 2)" 
-[[ -z "$mainbranch" ]] && echo " * Production branch unset in config. Using main" && mainbranch=main
+if [[ -z "$mainbranch" ]];
+then
+    echo " * Production branch unset in config. Using main"
+    mainbranch=main
+fi
 
 # Setting working branch branch to commit to
 workingbranch="$(grep workingbranch $configFile | cut -d = -f 2)" 
-[[ -z "$workingbranch" ]] && echo " * Working branch unset in config. Using main" && workingbranch=writting
-
+if [[ -z "$workingbranch" ]];
+then
+    echo " * Working branch unset in config. Using main" 
+    workingbranch=writting
+fi
 
 ##==========================================
 ## Starting for real now
 ##==========================================
 cd "$root"
+echo " * Syncing to source..."
+echo -n "      - " && git pull --all
+echo -n "      - " && git push --all origin
+echo ""
 
 case $1 in
     
     #Save the current branch and push it
     save)
-        # hugo -D
-	git pull
-	git add .
-	git commit
-	git push
+        #Disable this if you don't need to sync build files:
+        # hugo -D 
+	    git add .
+	    echo -n " * Commiting changes..."
+	    git commit
+	    echo -e "\n * pushing changes"
+	    git push
+	    echo -e "\n * [SUCCESS] Changes saved"
 
-	# if "jameson save publish" was used, publish next
-	[[ $2 == "publish" ]] && jameson publish
+	    # if "jameson save publish" was used, publish next
+	    [[ $2 == "publish" ]] && jameson publish
     ;;
 
     # Merge with the main branch and push changes. Updates the website
     publish)
         git checkout $mainbranch
+        echo ""
         git merge $workingbranch
         git push
+        echo ""
         git checkout $workingbranch
-        echo "Changes published"
+        echo -e "\n * [SUCCESS] Changes published"
     ;;
     
 # Import a picture into the project picture folder
@@ -109,7 +125,7 @@ case $1 in
             convert "$2" -resize 300x500 "$inputFile-thumb.webp"
             oldsize=$(ls -lh "$2" | awk '{print  $5}')
             newsize=$(ls -lh "$inputFile".webp | awk '{print  $5}')
-            echo " * file size : old=$oldsize ; new=$newsize"
+            echo "    ↳ file size : old=$oldsize ; new=$newsize"
         else
             # Create a copy to work safely
             cp "$2" "$inputFile.webp"
@@ -126,9 +142,10 @@ case $1 in
         fi
         outputFile="$(echo $outputFile | sed -r 's/([0-9. -]+)-/ -/g' )"
         
-        echo -n " * "
-        cp -v "$inputFile.webp" "$root/static/img/pictures/$outputFile.webp"
-        cp -v "$inputFile-thumb.webp" "$root/static/img/pictures/$outputFile-thumb.webp"
+        echo " * Copying files to project folder..."
+        cp "$inputFile.webp" "$root/static/img/pictures/$outputFile.webp"
+        cp "$inputFile-thumb.webp" "$root/static/img/pictures/$outputFile-thumb.webp"
+        echo " * [SUCCESS] Images imported."
         echo -n "/img/pictures/$outputFile.webp" | xclip -sel clip && echo " * image location copied to clipboard"
         
         rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made

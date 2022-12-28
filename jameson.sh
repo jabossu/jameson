@@ -68,17 +68,19 @@ fi
 ##==========================================
 cd "$root" # changing to project directory
 
-## Syncing all datas to source to prevent conflicts from arising
-echo " * Syncing to source..."
-echo -ne "     - Pulling : "
-git fetch --all
-git pull origin
-echo -ne "     - Pushing : " 
-git push --all origin
-echo ""
-
 ## Now reading arguments and acting accordingly
 case $1 in
+    
+    sync)
+    ## Syncing all datas to source to prevent conflicts from arising
+        echo " * Syncing to source..."
+        echo -ne "     - Pulling : "
+        git fetch --all
+        git pull origin
+        echo -ne "     - Pushing : " 
+        git push --all origin
+        echo ""
+    ;;
     
     #Save the current branch and push it
     save)
@@ -214,6 +216,7 @@ case $1 in
         Writting and content management tools
          - import <imagefile>   : convert image to WEBP and import it to the image folder
          - save                 : save changes 
+         - sync                 : pull and push branches to sync to origin
          - publish              : publish changes to main git branch
          - save publish         : save changes, then merges branch to main branch
          "

@@ -66,12 +66,18 @@ fi
 ##==========================================
 ## Starting for real now
 ##==========================================
-cd "$root"
+cd "$root" # changing to project directory
+
+## Syncing all datas to source to prevent conflicts from arising
 echo " * Syncing to source..."
-echo -n "      - " && git pull --all
-echo -n "      - " && git push --all origin
+echo -ne "     - Pulling : "
+git fetch --all
+git pull origin
+echo -ne "     - Pushing : " 
+git push --all origin
 echo ""
 
+## Now reading arguments and acting accordingly
 case $1 in
     
     #Save the current branch and push it
@@ -159,22 +165,24 @@ case $1 in
 
 # Create a new post and open it in the text editor
     new)
+        echo " * Creating a new post..."
         if [[ "$2" =~ "/" ]];
         then
             kind=$(echo "$2" | awk -F/ '{print $1}')
             if [[ -f "archetypes/$kind.md" ]];
             then
-                echo " * create new post as $kind"
+                echo " * [SUCCESS] Created new post as $kind"
                 hugo new "posts/$2.md" --kind "$kind"
+                $editor "content/posts/$2.md"
             else
-                echo " * archetype '$kind' does not exist"
-                echo "   avaiable archetypes are:"
+                echo " * [ERROR] Archetype '$kind' does not exist. Avaiable archetypes are:"
                 ls archetypes
             fi
         else
             hugo new "posts/$2.md"
+            echo " * [SUCCESS] post created"
+            $editor "content/posts/$2.md"
         fi
-        $editor "content/posts/$2.md"
     ;;
 
 # Run hugo local server
@@ -213,4 +221,5 @@ case $1 in
     
 esac
 
+echo ""
 cd $curdir

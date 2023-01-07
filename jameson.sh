@@ -222,6 +222,10 @@ case $1 in
          "
     ;;
     
+# No valid argument
+    *)
+        echo "Unknown argument. Use \"jameson help\""
+    ;;
 esac
 
 echo ""

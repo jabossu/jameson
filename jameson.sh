@@ -116,8 +116,12 @@ case $1 in
         ## If no argument was given, fail safely
         if [[ ! -v 2 ]];
         then
-            echo "syntax for import: jameson import <sourcepath> [<newname>]"
-            exit
+            echo " ! [ERROR ] syntax for import: jameson import <sourcepath> [<newname>]"
+            exit 1
+        elif [[ ! -f "$2" ]]; 
+        then
+            echo " ! [ERROR] file doesn't exist"
+            exit 1        
         fi
         
         # Get input file name and extension
@@ -151,10 +155,13 @@ case $1 in
         outputFile="$(echo $outputFile | sed -r 's/([0-9. -]+)-/ -/g' )"
         
         echo " * Copying files to project folder..."
-        cp "$inputFile.webp" "$root/static/img/pictures/$outputFile.webp"
-        cp "$inputFile-thumb.webp" "$root/static/img/pictures/$outputFile-thumb.webp"
+            yearmonth="$(date -u +%Y-%m)"
+            outputDirectory="$root/static/img/pictures/$yearmonth"
+            mkdir -p $outputDirectory
+            cp "$inputFile.webp" "$outputDirectory/$outputFile.webp"
+            cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
         echo " * [SUCCESS] Images imported."
-        echo -n "/img/pictures/$outputFile.webp" | xclip -sel clip && echo " * image location copied to clipboard"
+        echo -n "/img/pictures/$yearmonth/$outputFile.webp" | xclip -sel clip 2>/dev/null && echo " * image location copied to clipboard" || echo " ! could not copy file path. Maybe install xclip ?"
         
         rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made
     ;;

@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.2"
+version="1.2.1"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -175,22 +175,23 @@ case $1 in
 # Create a new post and open it in the text editor
     new)
         echo " * Creating a new post..."
-        if [[ "$2" =~ "/" ]];
+        post="$(echo $2 | sed 's/ /-/g')"
+        if [[ "$post" =~ "/" ]];
         then
-            kind=$(echo "$2" | awk -F/ '{print $1}')
+            kind=$(echo "$post" | awk -F/ '{print $1}')
             if [[ -f "archetypes/$kind.md" ]];
             then
                 echo " * [SUCCESS] Created new post as $kind"
-                hugo new "posts/$2.md" --kind "$kind"
-                $editor "content/posts/$2.md"
+                hugo new "posts/$post.md" --kind "$kind"
+                $editor "content/posts/$post.md"
             else
                 echo " * [ERROR] Archetype '$kind' does not exist. Avaiable archetypes are:"
                 ls archetypes
             fi
         else
-            hugo new "posts/$2.md"
+            hugo new "posts/$post.md"
             echo " * [SUCCESS] post created"
-            $editor "content/posts/$2.md"
+            $editor "content/posts/$post.md"
         fi
     ;;
 

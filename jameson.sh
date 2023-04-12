@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.2.1"
+version="1.2.2"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -205,7 +205,24 @@ case $1 in
         echo "The following posts are still drafted :"
         grep "draft: true" content/  -r | sed -z 's/content\// * /g' | cut -d ':' -f 1 
     ;;
+    
+# List all posts, filter by keyword
+    list)
+        keyword="$3"
+        command="ls -FC1t --color=always --group-directories-first"
 
+        echo "Written Posts:"
+        echo "--------------"
+        if [[ -n $2 ]];
+        then
+            # filter by keyword
+            $command content/posts/$2
+        else
+            # no keyword to filter
+            $command content/posts/
+        fi
+    ;;
+    
 # Help
     help)
         echo "syntax: jameson <command> <arguments>
@@ -220,6 +237,7 @@ case $1 in
          - work                 : run hugo localhost server
          - edit <title>         : open post in editor
          - drafts               : list drafted posts
+         - list <keyword>       : list posts. Filter by keyword (optionnal)
          
         Writting and content management tools
          - import <imagefile>   : convert image to WEBP and import it to the image folder

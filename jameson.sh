@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.2.2"
+version="1.3.0"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -134,7 +134,6 @@ case $1 in
         then
             echo " * Convert image to WEBP"
             convert "$2" "$inputFile.webp"
-            convert "$2" -resize 300x500 "$inputFile-thumb.webp"
             oldsize=$(ls -lh "$2" | awk '{print  $5}')
             newsize=$(ls -lh "$inputFile".webp | awk '{print  $5}')
             echo "    ↳ file size : old=$oldsize ; new=$newsize"
@@ -143,7 +142,7 @@ case $1 in
             cp "$2" "$inputFile.webp"
         fi
         # create thumbnail
-        convert "$2" -resize 300x500 "$inputFile-thumb.webp"
+        convert "$2" -resize 400x600 "$inputFile-thumb.webp"
         
         # Check if the output should have another filename
         if [[ -v 3 ]];
@@ -160,6 +159,11 @@ case $1 in
             mkdir -p $outputDirectory
             cp "$inputFile.webp" "$outputDirectory/$outputFile.webp"
             cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
+            
+            cd "$root"
+            git add "$outputDirectory/$outputFile.webp" "$outputDirectory/$outputFile-thumb.webp"
+            git commit -m "imported images $outputFile"
+            
         echo " * [SUCCESS] Images imported."
         echo -n "/img/pictures/$yearmonth/$outputFile.webp" | xclip -sel clip 2>/dev/null && echo " * image location copied to clipboard" || echo " ! could not copy file path. Maybe install xclip ?"
         
@@ -169,7 +173,25 @@ case $1 in
 # Edits a post
     edit)
         echo " * Opening editor..."
-        fd "$2" content/ -x $editor {}
+        
+        for i in $(fd "$2" content/)  # Get all textfiles relevant and work on each of them in order
+        do
+            if [ "$(grep 'draft: true' $i)" ]; then
+            # if the post is a draft : we have to update the date to today
+            # if the post is already published, we do not change it and skip this step
+                echo ' * Post is drafted : updating post date'
+                sed "s/date: .*/date: $(date +%Y-%m-%d)/" "$i" > tmp
+                mv tmp "$i" ## we have to do this or 'sed' removes all the content
+            else
+            #
+                echo ' * Post is already published : not changing post date'
+            fi
+            
+            $editor "$i"
+            git add "$i" && git commit -m "Edited $i" 
+        done
+        
+        #git add -A && git commit -m "Edit posts with keyword : $2"
     ;;
 
 # Create a new post and open it in the text editor
@@ -189,15 +211,19 @@ case $1 in
                 ls archetypes
             fi
         else
+        
             hugo new "posts/$post.md"
             echo " * [SUCCESS] post created"
+            git add "content/posts/$post.md"
+            git commit -m "New post : $post"
+            
             $editor "content/posts/$post.md"
         fi
     ;;
 
 # Run hugo local server
     work)
-        hugo server -D
+        hugo server -D --disableFastRender
     ;;
 
 # List drafts

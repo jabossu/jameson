@@ -213,11 +213,10 @@ case $1 in
         else
         
             hugo new "posts/$post.md"
-            echo " * [SUCCESS] post created"
+            echo " * [SUCCESS] post created"            
+            $editor "content/posts/$post.md"
             git add "content/posts/$post.md"
             git commit -m "New post : $post"
-            
-            $editor "content/posts/$post.md"
         fi
     ;;
 

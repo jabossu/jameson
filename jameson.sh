@@ -1,11 +1,11 @@
 #! /bin/bash
 ##==========================================
-## Jameson, the friendly helper for Hugo
+## Jameson, the friendly helper for Hugo (gohugo.io)
 ## (named after J. Jonah Jameson)
 ##
 ##  written by jabossu under GPL3
 
-version="1.3.0"
+version="1.3.1"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -173,7 +173,7 @@ case $1 in
         
 # Edits a post
     edit)
-        echo " * Opening editor..."
+        echo " - Editing posts with keyword $2..."
         
         for i in $(fd "$2" content/)  # Get all textfiles relevant and work on each of them in order
         do
@@ -188,11 +188,12 @@ case $1 in
                 echo ' * Post is already published : not changing post date'
             fi
             
-            $editor "$i" 2&>/dev/null
+            echo "opening editor on '$i'"
+            $editor "$i" 2>/dev/null
         done
         
         echo " * Committing changes..."
-        git add -A --quiet && git commit 
+        echo -n ' - ' && git add -A && git --quiet commit 
     ;;
 
 # Create a new post and open it in the text editor

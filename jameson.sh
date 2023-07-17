@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.3.2"
+version="1.3.3"
 echo "
    oooo                                                                      
    \`888                                                                      
@@ -192,15 +192,16 @@ case $1 in
             
             #open file for edit while the local webserver is running so we can look at it
             hugo server -D --disableFastRender &>/dev/null &
-            echo " ! Webserver running at http://localhost:1313 ; opening web browser"
-            xdg-open "http://localhost:1313" # open web browser at the same time
+            echo " ! Webserver running at http://localhost:1313/ ; opening web browser"
+            tmp=${i/content\///} ; address=${tmp/\.md//}
+            xdg-open "http://localhost:1313/$address" # open web browser at the same time
             $editor "$i" 2>/dev/null # open editor on file
             ### ... work gets done ...
             pkill hugo # editing is done : kill local browser
         done
         
         echo " * Committing changes..."
-        echo -n ' - ' && git add -A && git --quiet commit 
+        echo -n ' - ' && git add -A && git commit --quiet 
     ;;
 
 # Create a new post and open it in the text editor

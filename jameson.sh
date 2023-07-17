@@ -161,8 +161,9 @@ case $1 in
             cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
             
             cd "$root"
-            git add "$outputDirectory/$outputFile.webp" "$outputDirectory/$outputFile-thumb.webp"
-            git commit -m "imported images $outputFile"
+            echo " * Committing changes..."
+            git add --quiet "$outputDirectory/$outputFile.webp" "$outputDirectory/$outputFile-thumb.webp"
+            git commit -m --quiet "imported images $outputFile"
             
         echo " * [SUCCESS] Images imported."
         echo -n "/img/pictures/$yearmonth/$outputFile.webp" | xclip -sel clip 2>/dev/null && echo " * image location copied to clipboard" || echo " ! could not copy file path. Maybe install xclip ?"
@@ -187,11 +188,11 @@ case $1 in
                 echo ' * Post is already published : not changing post date'
             fi
             
-            $editor "$i"
-            git add "$i" && git commit -m "Edited $i" 
+            $editor "$i" 2&>/dev/null
         done
         
-        #git add -A && git commit -m "Edit posts with keyword : $2"
+        echo " * Committing changes..."
+        git add -A --quiet && git commit 
     ;;
 
 # Create a new post and open it in the text editor
@@ -215,8 +216,8 @@ case $1 in
             hugo new "posts/$post.md"
             echo " * [SUCCESS] post created"            
             $editor "content/posts/$post.md"
-            git add "content/posts/$post.md"
-            git commit -m "New post : $post"
+            git add --quiet "content/posts/$post.md"
+            git commit -m --quiet "New post : $post"
         fi
     ;;
 

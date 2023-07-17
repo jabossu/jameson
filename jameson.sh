@@ -188,8 +188,15 @@ case $1 in
                 echo ' * Post is already published : not changing post date'
             fi
             
-            echo "opening editor on '$i'"
-            $editor "$i" 2>/dev/null
+            echo " * Opening editor on '$i'"
+            
+            #open file for edit while the local webserver is running so we can look at it
+            hugo server -D --disableFastRender &>/dev/null &
+            echo " ! Webserver running at http://localhost:1313 ; opening web browser"
+            xdg-open "http://localhost:1313" # open web browser at the same time
+            $editor "$i" 2>/dev/null # open editor on file
+            ### ... work gets done ...
+            pkill hugo # editing is done : kill local browser
         done
         
         echo " * Committing changes..."

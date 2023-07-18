@@ -5,8 +5,9 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.3.4"
+version="1.4.0"
 echo "
+____________________________________________________________________________________
    oooo                                                                      
    \`888                                                                      
     888  .oooo.   ooo. .oo.  .oo.    .ooooo.   .oooo.o  .ooooo.  ooo. .oo.   
@@ -15,6 +16,7 @@ echo "
     888 d8(  888   888   888   888  888    .o o.  )88b 888   888  888   888  
 .o. 88P \`Y888\"\"8o o888o o888o o888o \`Y8bod8P' 8\"\"888P' \`Y8bod8P' o888o o888o 
 \`Y888P                                                                       v$version
+____________________________________________________________________________________
 "
 
 curdir=`pwd`
@@ -289,6 +291,19 @@ case $1 in
          - publish              : publish changes to main git branch
          - save publish         : save changes, then merges branch to main branch
          "
+    ;;
+    
+# Help with shortcodes
+    shortcodes)
+        if [ -f "layouts/shortcodes/$2.html" ] ; then
+            echo " - Shortcode $2 :"
+            grep shortdescr "layouts/shortcodes/$2.html"
+            grep shortsyntax "layouts/shortcodes/$2.html"
+        else
+            echo " - Avaiable shortcodes :"
+            echo "   ====================="
+            ls layouts/shortcodes/
+        fi
     ;;
     
 # No valid argument

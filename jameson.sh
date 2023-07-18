@@ -173,10 +173,12 @@ case $1 in
         
 # Edits a post
     edit)
-        echo " - Editing posts with keyword $2..."
+        echo " - Editing posts with keyword \"$2\"..."
         
+        n=0
         for i in $(fd "$2" content/)  # Get all textfiles relevant and work on each of them in order
         do
+            let "n+=1"
             if [ "$(grep 'draft: true' $i)" ]; then
             # if the post is a draft : we have to update the date to today
             # if the post is already published, we do not change it and skip this step
@@ -194,11 +196,17 @@ case $1 in
             hugo server -D --disableFastRender &>/dev/null &
             echo " ! Webserver running at http://localhost:1313/ ; opening web browser"
             tmp=${i/content\///} ; address=${tmp/\.md//}
-            xdg-open "http://localhost:1313/$address" # open web browser at the same time
+            xdg-open "http://localhost:1313/$address" &>/dev/null # open web browser at the same time
             $editor "$i" 2>/dev/null # open editor on file
             ### ... work gets done ...
             pkill hugo # editing is done : kill local browser
         done
+        
+        if [ $n -eq '0' ] ; then
+            echo " ! error : no post found"
+            echo ""
+            exit 1
+        fi
         
         echo " * Committing changes..."
         echo -n ' - ' && git add -A && git commit --quiet 

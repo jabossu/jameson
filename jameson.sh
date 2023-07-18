@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.4.0"
+version="1.4.1"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -161,16 +161,15 @@ case $1 in
             mkdir -p $outputDirectory
             cp "$inputFile.webp" "$outputDirectory/$outputFile.webp"
             cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
+            rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made
             
             cd "$root"
             echo " * Committing changes..."
-            git add --quiet "$outputDirectory/$outputFile.webp" "$outputDirectory/$outputFile-thumb.webp"
-            git commit -m --quiet "imported images $outputFile"
+            git add "$outputDirectory/$outputFile.webp" "$outputDirectory/$outputFile-thumb.webp"
+            git commit --quiet -m "imported images $outputFile"
             
         echo " * [SUCCESS] Images imported."
         echo -n "/img/pictures/$yearmonth/$outputFile.webp" | xclip -sel clip 2>/dev/null && echo " * image location copied to clipboard" || echo " ! could not copy file path. Maybe install xclip ?"
-        
-        rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made
     ;;
         
 # Edits a post

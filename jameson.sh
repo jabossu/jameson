@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.4.1"
+version="1.5.0"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -73,8 +73,9 @@ cd "$root" # changing to project directory
 ## Now reading arguments and acting accordingly
 case $1 in
     
+##==========================================    
     sync)
-    ## Syncing all datas to source to prevent conflicts from arising
+## Syncing all datas to source to prevent conflicts from arising
         echo " * Syncing to source..."
         echo -ne "     - Pulling : "
         git fetch --all
@@ -84,7 +85,8 @@ case $1 in
         echo ""
     ;;
     
-    #Save the current branch and push it
+##==========================================
+#Save the current branch and push it
     save)
         #Disable this if you don't need to sync build files:
         # hugo -D 
@@ -99,7 +101,8 @@ case $1 in
 	    [[ $2 == "publish" ]] && jameson publish
     ;;
 
-    # Merge with the main branch and push changes. Updates the website
+##==========================================
+# Merge with the main branch and push changes. Updates the website
     publish)
         git checkout $mainbranch
         echo ""
@@ -109,7 +112,8 @@ case $1 in
         git checkout $workingbranch
         echo -e "\n * [SUCCESS] Changes published"
     ;;
-    
+ 
+ ##==========================================   
 # Import a picture into the project picture folder
 	# option : -k to keep source file
     import)
@@ -172,6 +176,7 @@ case $1 in
         echo -n "/img/pictures/$yearmonth/$outputFile.webp" | xclip -sel clip 2>/dev/null && echo " * image location copied to clipboard" || echo " ! could not copy file path. Maybe install xclip ?"
     ;;
         
+##==========================================
 # Edits a post
     edit)
         echo " - Editing posts with keyword \"$2\"..."
@@ -212,7 +217,8 @@ case $1 in
         echo " * Committing changes..."
         echo -n ' - ' && git add -A && git commit --quiet 
     ;;
-
+    
+##==========================================
 # Create a new post and open it in the text editor
     new)
         echo " * Creating a new post..."
@@ -233,23 +239,62 @@ case $1 in
         
             hugo new "posts/$post.md"
             echo " * [SUCCESS] post created"            
-            $editor "content/posts/$post.md"
-            git add --quiet "content/posts/$post.md"
-            git commit -m --quiet "New post : $post"
+            $editor "content/posts/$post.md" &>/dev/null
+            git add "content/posts/$post.md"
+            git commit --quiet -m "New post : $post"
         fi
     ;;
 
+##==========================================
 # Run hugo local server
     work)
         hugo server -D --disableFastRender
+        # -D : render Drafts
+        # - --disable Fast Render so updates to CSS files are displayed too 
     ;;
 
-# List drafts
+##==========================================
+# List & edit drafts
     drafts)
-        echo "The following posts are still drafted :"
-        grep "draft: true" content/  -r | sed -z 's/content\// * /g' | cut -d ':' -f 1 
+        echo -e "The following posts are still drafted :\n"
+        j=0
+        for i in $(grep "draft: true" content/  -r | \
+            sed -z 's/content\/posts\///g' | \
+            cut -d ':' -f 1 | \
+            sed -z 's/.md//g')
+        do
+            let "j+=1"
+            echo -e "\t$j. $i"
+        done
+        
+        echo ""
+        read -p "> Edit a drafts ? [1-$j ; n=exit] " edit
+        
+        re='^[0-9]+$'
+        if [[ $edit =~ $re ]] ; then
+        
+            if [ "$edit" -le $j ] ; then
+                j=0
+                for i in $(grep "draft: true" content/  -r | \
+                    sed -z 's/content\/posts\///g' | \
+                    cut -d ':' -f 1 | \
+                    sed -z 's/.md//g')
+                do
+                    let "j+=1"
+                    if [ "$j" -eq "$edit" ]; then
+                        echo " ! Opening $i for editing"
+                        $editor "content/posts/$i.md" &>/dev/null
+                        git add -A
+                        git commit --quiet
+                        exit 0
+                    fi
+                done
+            fi
+            echo " * No draft selected"
+        fi
     ;;
-    
+
+##==========================================   
 # List all posts, filter by keyword
     list)
         keyword="$3"

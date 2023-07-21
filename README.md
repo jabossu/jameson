@@ -35,15 +35,24 @@ An example is provided in this git repo, and Jameson with create and populate a 
 The config file should be placed in `$HOME/.config/jameson/jameson.conf`
 
 ### root
-```root=/home/username/myhugoblogroot```
+```
+root=/home/username/myhugoblogroot
+```
+
 the path to the root folder of your hugo project
 
 ### editor
-```editor=nano```
+```
+editor=nano
+```
+
 the command to execute as an editor
 
 ### Git branches
-```mainbranch=main
-workingbranch=writting```
+```
+mainbranch=main
+workingbranch=writting
+```
+
 - **Mainbranch** is the production branch : where to push to when you're done with your editing
 - **Workingbranch** is where you will edit and create and modify your blog in the time between release.

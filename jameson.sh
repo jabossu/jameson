@@ -189,10 +189,10 @@ case $1 in
         echo " - Editing posts with keyword \"$2\"..."
         
         n=0
-        for i in $(fd "$2" content/)  # Get all textfiles relevant and work on each of them in order
+        for i in "$(fd "$2" content/)"  # Get all textfiles relevant and work on each of them in order
         do
             let "n+=1"
-            if [ "$(grep 'draft: true' $i)" ]; then
+            if [ $(grep 'draft: true' "$i") ]; then
             # if the post is a draft : we have to update the date to today
             # if the post is already published, we do not change it and skip this step
                 echo ' * Post is drafted : updating post date'

@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.5.0"
+version="1.5.1"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -30,15 +30,22 @@ configFile="$HOME/.config/jameson.conf"
 if [[ ! -f $configFile ]];
 then
     echo " * Error : config file doesn't exist."
-    exit 1
+    echo " ! creating a file with default options"
+        mkdir "$HOME/.config"
+        echo "## Jameson Config File :
+root=$HOME/myHugoProject
+editor=nano
+mainbranch=main
+workingbranch=writting" > $configFile
 fi
 
 # Setting editor. Nano is the default
 editor="$(grep editor $configFile | cut -d = -f 2)" 
 if [[ ! -x "$(command -v $editor)" ]];
 then
-    echo " * Editor $editor not set in config file. Using Nano"
-    editor='nano'
+    echo " * Error :Editor $editor not found"
+    echo " * Edit $configFile and choose a working editing software"
+    exit 1
 fi
 
 # Setting root directory and checking if it exists
@@ -46,7 +53,7 @@ root="$(grep root $configFile | cut -d = -f 2)"
 if [[ ! -d $root ]];
 then
     echo " * Root directory set incorrectly in config file. Cannot run."
-    exit 3
+    exit 1
 fi    
 
 # Setting main branch to publish to

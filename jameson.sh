@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.5.1"
+version="1.6.0"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -195,22 +195,37 @@ case $1 in
             drafted=`grep 'draft: true' "$i"`
             if [ "$drafted" != '' ]; then
             # if the post is a draft : we have to update the date to today
-            # if the post is already published, we do not change it and skip this step
                 echo ' * Post is drafted : updating post date'
                 sed "s/date: .*/date: $(date +%Y-%m-%d)/" "$i" > tmp
                 mv tmp "$i" ## we have to do this or 'sed' removes all the content
             else
-            #
-                echo ' * Post is already published : not changing post date'
+            # if the post is already published, we update lastmod date
+                echo ' * Post is already published : updating lastmod'
+                if [[ "$(grep lastmod $i)" ]];then
+                    sed "s/lastmod: .*/lastmod: $(date +%Y-%m-%d)/" "$i" > tmp
+                else
+                    sed "s/^date:/lastmod: $(date +%Y-%m-%d)\ndate:/" "$i" > tmp
+                fi
+                mv tmp "$i" ## we have to do this or 'sed' removes all the content
             fi
             
             echo " * Opening editor on '$i'"
             
+            if [ "$3" == '-w' ]; then
+            # if option -w if passed...
             #open file for edit while the local webserver is running so we can look at it
-            hugo server -D --disableFastRender &>/dev/null &
-            echo " ! Webserver running at http://localhost:1313/ ; opening web browser"
-            tmp=${i/content\///} ; address=${tmp/\.md//}
-            xdg-open "http://localhost:1313/$address" &>/dev/null # open web browser at the same time
+                if [ ! "$(pidof hugo &>/dev/null)" ]; then
+                    # if hugo server is not yet running
+                    hugo server -D --disableFastRender &>/dev/null &
+                    echo " ! Starting local webserver…"
+                    sleep 1s # slight delay for web server to start properly
+                fi
+                
+                echo " ! Webserver running at http://localhost:1313/ ; opening web browser"
+                tmp=${i/content\///} ; address=${tmp/\.md//}
+                xdg-open "http://localhost:1313/$address" &>/dev/null # open web browser at the same time
+            fi
+            
             $editor "$i" 2>/dev/null # open editor on file
             ### ... work gets done ...
             pkill hugo # editing is done : kill local browser

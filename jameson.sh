@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.6.0"
+version="1.6.3"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -188,48 +188,83 @@ case $1 in
     edit)
         echo " - Editing posts with keyword \"$2\"..."
         
-        n=0
-        for i in "$(fd "$2" content/)"  # Get all textfiles relevant and work on each of them in order
+        results=$(fd "$2" content/ -t f)
+        if [[ $results == "" ]] ; then
+            echo " - no matching file found ! "
+            exit 1
+        fi
+
+        echo " - Found matching content:"
+        echo "   ======================="       
+        n=0; for i in $results  # Get all textfiles relevant and work on each of them in order
         do
             let "n+=1"
-            drafted=`grep 'draft: true' "$i"`
-            if [ "$drafted" != '' ]; then
-            # if the post is a draft : we have to update the date to today
-                echo ' * Post is drafted : updating post date'
-                sed "s/date: .*/date: $(date +%Y-%m-%d)/" "$i" > tmp
-                mv tmp "$i" ## we have to do this or 'sed' removes all the content
-            else
-            # if the post is already published, we update lastmod date
-                echo ' * Post is already published : updating lastmod'
-                if [[ "$(grep lastmod $i)" ]];then
-                    sed "s/lastmod: .*/lastmod: $(date +%Y-%m-%d)/" "$i" > tmp
-                else
-                    sed "s/^date:/lastmod: $(date +%Y-%m-%d)\ndate:/" "$i" > tmp
-                fi
-                mv tmp "$i" ## we have to do this or 'sed' removes all the content
-            fi
-            
-            echo " * Opening editor on '$i'"
-            
-            if [ "$3" == '-w' ]; then
-            # if option -w if passed...
-            #open file for edit while the local webserver is running so we can look at it
-                if [ ! "$(pidof hugo &>/dev/null)" ]; then
-                    # if hugo server is not yet running
-                    hugo server -D --disableFastRender &>/dev/null &
-                    echo " ! Starting local webserver…"
-                    sleep 1s # slight delay for web server to start properly
-                fi
-                
-                echo " ! Webserver running at http://localhost:1313/ ; opening web browser"
-                tmp=${i/content\///} ; address=${tmp/\.md//}
-                xdg-open "http://localhost:1313/$address" &>/dev/null # open web browser at the same time
-            fi
-            
-            $editor "$i" 2>/dev/null # open editor on file
-            ### ... work gets done ...
-            pkill hugo # editing is done : kill local browser
+            echo  -e "\t$n. $i"
         done
+        echo ''
+        
+        if [[ "$n" -eq 1 ]]; then
+            echo " - only one result. Editing..."
+        else
+            read -p " > which file to edit ? [1-$n ; n=exit] " edit
+        
+            re='^[0-9]+$'
+            if [[ $edit =~ $re ]] ; then
+            
+                if [[ "$edit" -le $n ]] ; then
+                    j=0
+                    for i in $results
+                    do
+                        let "j+=1"
+                        if [ "$j" -eq "$edit" ]; then
+                            echo " ! Opening $i for editing"
+                            $editor "$i" &>/dev/null
+                            git add -A
+                            git commit --quiet
+                            exit 0
+                        fi
+                    done
+                fi
+            fi
+        fi
+
+        drafted=`grep 'draft: true' "$i"`
+        if [ "$drafted" != '' ]; then
+        # if the post is a draft : we have to update the date to today
+            echo ' * Post is drafted : updating post date'
+            sed "s/date: .*/date: $(date +%Y-%m-%d)/" "$i" > tmp
+            mv tmp "$i" ## we have to do this or 'sed' removes all the content
+        else
+        # if the post is already published, we update lastmod date
+            echo ' * Post is already published : updating lastmod'
+            if [[ "$(grep lastmod $i)" ]];then
+                sed "s/lastmod: .*/lastmod: $(date +%Y-%m-%d)/" "$i" > tmp
+            else
+                sed "s/^date:/lastmod: $(date +%Y-%m-%d)\ndate:/" "$i" > tmp
+            fi
+            mv tmp "$i" ## we have to do this or 'sed' removes all the content
+        fi
+        
+        echo " * Opening editor on '$i'"
+        
+        if [ "$3" == '-w' ]; then
+        # if option -w if passed...
+        #open file for edit while the local webserver is running so we can look at it
+            if [ ! "$(pidof hugo &>/dev/null)" ]; then
+                # if hugo server is not yet running
+                hugo server -D --disableFastRender &>/dev/null &
+                echo " ! Starting local webserver…"
+                sleep 1s # slight delay for web server to start properly
+            fi
+            
+            echo " ! Webserver running at http://localhost:1313/ ; opening web browser"
+            tmp=${i/content\///} ; address=${tmp/\.md//}
+            xdg-open "http://localhost:1313/$address" &>/dev/null # open web browser at the same time
+        fi
+        
+        $editor "$i" 2>/dev/null # open editor on file
+        ### ... work gets done ...
+        pkill hugo # editing is done : kill local browser
         
         if [ $n -eq '0' ] ; then
             echo " ! error : no post found"
@@ -291,7 +326,7 @@ case $1 in
         done
         
         echo ""
-        read -p "> Edit a drafts ? [1-$j ; n=exit] " edit
+        read -p " > Edit a drafts ? [1-$j ; n=exit] " edit
         
         re='^[0-9]+$'
         if [[ $edit =~ $re ]] ; then
@@ -361,7 +396,7 @@ case $1 in
     ;;
     
 # Help with shortcodes
-    shortcodes)
+    shortcode)
         if [ -f "layouts/shortcodes/$2.html" ] ; then
             echo " - Shortcode $2 :"
             grep shortdescr "layouts/shortcodes/$2.html"

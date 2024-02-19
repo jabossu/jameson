@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.6.3"
+version="1.6.4"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -147,6 +147,7 @@ case $1 in
         then
             echo " * Convert image to WEBP"
             convert "$2" "$inputFile.webp"
+            exiftool -all= "$inputFile.webp"
             oldsize=$(ls -lh "$2" | awk '{print  $5}')
             newsize=$(ls -lh "$inputFile".webp | awk '{print  $5}')
             echo "    ↳ file size : old=$oldsize ; new=$newsize"
@@ -156,22 +157,34 @@ case $1 in
         fi
         # create thumbnail
         convert "$2" -resize 400x600 "$inputFile-thumb.webp"
+        exiftool -all= "$inputFile-thumb.webp"
         
         # Check if the output should have another filename
         if [[ -v 3 ]];
         then
             outputFile="$3"
         else
-            outputFile="$inputFile"
+            # Remove personnal data from filename
+            outputFile="$(echo $inputFile | sed 's/jabosu/mijourney/' | cut -c -12)"
         fi
-        outputFile="$(echo $outputFile | sed -r 's/([0-9. -]+)-/ -/g' )"
+        # Remove special characters
+        outputFile="$(echo $outputFile | sed -r 's/([0-9. -@!*$=&]+)-/_/g' )"
         
         echo " * Copying files to project folder..."
             yearmonth="$(date -u +%Y-%m)"
             outputDirectory="$root/static/img/pictures/$yearmonth"
             mkdir -p $outputDirectory
-            cp "$inputFile.webp" "$outputDirectory/$outputFile.webp"
-            cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
+            
+            ## Check if destination already exists to avoid removing it
+            if [[ -f $outputDirectory/$outputFile.webp ]] ; then
+                echo " ! ERROR : file already exists."
+                echo " ! $outputDirectory/$outputFile.webp found"
+                echo " ! use a destination parameter to still import the image"
+                exit 1
+            else
+                cp "$inputFile.webp" "$outputDirectory/$outputFile.webp"
+                cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
+            fi
             rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made
             
             cd "$root"
@@ -306,9 +319,32 @@ case $1 in
 ##==========================================
 # Run hugo local server
     work)
-        hugo server -D --disableFastRender
-        # -D : render Drafts
-        # - --disable Fast Render so updates to CSS files are displayed too 
+        echo -n " * Starting webserver... "
+        pidof hugo 2&>/dev/null && running=true || running=false
+        if [ "$running" == true ] ; then
+            echo "[ERROR]"
+            echo " ! Already running... skipping."
+            exit 1
+        else
+            hugo server -D --disableFastRender  2&>/dev/null &
+            # -D : render Drafts
+            # - --disable Fast Render so updates to CSS files are displayed too 
+            sleep 1s
+            echo "[DONE]"
+        fi
+        echo " * Opening browser..."
+        xdg-open http://localhost:1313
+    ;;
+
+# Run hugo local server
+    stop)
+        pidof hugo 2&>/dev/null && running=true || running=false
+        if [ "$running" == true ] ; then
+            echo -n " * Stopping webserver... "
+            pkill hugo && echo '[DONE]'
+        else
+            echo " * Webserver not running - doing nothing"
+        fi
     ;;
 
 ##==========================================
@@ -349,6 +385,30 @@ case $1 in
                 done
             fi
             echo " * No draft selected"
+        fi
+    ;;
+    
+    open)
+        # Open project folder
+        
+        # open a post older
+        if [[ "$2" =~ "posts" ]] ; then
+            if [[ -d "$root/content/$2" ]] ; then
+                echo " - Opening posts $2"
+                xdg-open "$root/content/$2"
+            else
+                echo " ! Folder doesn't exist"
+                echo " - avaiable options :"
+                ls -1d $root/content/posts/*/ | rev | cut -d '/' -f 2-3 | rev
+            fi
+        #open any folder
+        elif [[ -d "$root/$2" ]] ; then
+            echo " - Opening $root/$2"
+            xdg-open "$root/$2"
+        # open root folder
+        else
+            echo " - Opening $root"
+            xdg-open $root
         fi
     ;;
 
@@ -414,5 +474,5 @@ case $1 in
     ;;
 esac
 
-echo ""
+echo " ---bye---"
 cd $curdir

@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.6.4"
+version="1.6.5"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -165,7 +165,7 @@ case $1 in
             outputFile="$3"
         else
             # Remove personnal data from filename
-            outputFile="$(echo $inputFile | sed 's/jabosu/mijourney/' | cut -c -12)"
+            outputFile="$(echo $inputFile | sed 's/jabosu/mijourney/' | cut -c -32)"
         fi
         # Remove special characters
         outputFile="$(echo $outputFile | sed -r 's/([0-9. -@!*$=&]+)-/_/g' )"
@@ -182,10 +182,9 @@ case $1 in
                 echo " ! use a destination parameter to still import the image"
                 exit 1
             else
-                cp "$inputFile.webp" "$outputDirectory/$outputFile.webp"
-                cp "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
+                mv "$inputFile.webp" "$outputDirectory/$outputFile.webp"
+                mv "$inputFile-thumb.webp" "$outputDirectory/$outputFile-thumb.webp"
             fi
-            rm "$inputFile.webp" "$inputFile-thumb.webp" "$2" # discard the original and copy we made
             
             cd "$root"
             echo " * Committing changes..."

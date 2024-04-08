@@ -165,10 +165,14 @@ case $1 in
             outputFile="$3"
         else
             # Remove personnal data from filename
-            outputFile="$(echo $inputFile | sed 's/jabosu/mijourney/' | cut -c -32)"
+            outputFile="$(echo $inputFile | sed 's/jabosu/mijourney/')"
         fi
+        
         # Remove special characters
         outputFile="$(echo $outputFile | sed -r 's/([0-9. -@!*$=&]+)-/_/g' )"
+        
+        #limit longer filenames
+        outputFile="$(echo $outputFile | cut -c -62)"
         
         echo " * Copying files to project folder..."
             yearmonth="$(date -u +%Y-%m)"
@@ -415,17 +419,17 @@ case $1 in
 # List all posts, filter by keyword
     list)
         keyword="$3"
-        command="ls -FC1t --color=always --group-directories-first"
+        command="ls -F --group-directories-first -v"
 
         echo "Written Posts:"
         echo "--------------"
         if [[ -n $2 ]];
         then
             # filter by keyword
-            $command content/posts/$2
+            $command content/posts/$2 
         else
             # no keyword to filter
-            $command content/posts/
+            $command content/posts/ 
         fi
     ;;
     

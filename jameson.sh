@@ -21,6 +21,11 @@ ________________________________________________________________________________
 
 curdir=`pwd`
 
+function edit { 
+	$editor $1 2>/dev/null 
+	return 0
+}
+
 ##==========================================
 ## Configuration steps
 ##==========================================
@@ -124,7 +129,7 @@ case $1 in
 # Import a picture into the project picture folder
 	# option : -k to keep source file
     import)
-        cd $curdir #we need to stay where the command was run from
+        cd "$curdir" #we need to stay where the command was run from
         
         ## If no argument was given, fail safely
         if [[ ! -v 2 ]];
@@ -234,7 +239,7 @@ case $1 in
                         let "j+=1"
                         if [ "$j" -eq "$edit" ]; then
                             echo " ! Opening $i for editing"
-                            $editor "$i" &>/dev/null
+                            edit "$i" 
                             git add -A
                             git commit --quiet
                             exit 0
@@ -278,7 +283,7 @@ case $1 in
             xdg-open "http://localhost:1313/$address" &>/dev/null # open web browser at the same time
         fi
         
-        $editor "$i" 2>/dev/null # open editor on file
+        edit "$i" 2>/dev/null # open editor on file
         ### ... work gets done ...
         pkill hugo # editing is done : kill local browser
         
@@ -304,16 +309,16 @@ case $1 in
             then
                 echo " * [SUCCESS] Created new post as $kind"
                 hugo new "posts/$post.md" --kind "$kind"
-                $editor "content/posts/$post.md"
+                edit "content/posts/$post.md" 
             else
                 echo " * [ERROR] Archetype '$kind' does not exist. Avaiable archetypes are:"
                 ls archetypes
             fi
         else
         
-            hugo new "posts/$post.md"
-            echo " * [SUCCESS] post created"            
-            $editor "content/posts/$post.md" &>/dev/null
+            hugo new "posts/$post.md" &&\
+	            echo " * [SUCCESS] post created" &&\
+	            edit "content/posts/$post.md" 
             git add "content/posts/$post.md"
             git commit --quiet -m "New post : $post"
         fi
@@ -380,7 +385,7 @@ case $1 in
                     let "j+=1"
                     if [ "$j" -eq "$edit" ]; then
                         echo " ! Opening $i for editing"
-                        $editor "content/posts/$i.md" &>/dev/null
+                        edit "content/posts/$i.md" 
                         git add -A
                         git commit --quiet
                         exit 0
@@ -478,4 +483,4 @@ case $1 in
 esac
 
 echo " ---bye---"
-cd $curdir
+cd "$curdir"

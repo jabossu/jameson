@@ -5,7 +5,7 @@
 ##
 ##  written by jabossu under GPL3
 
-version="1.6.5"
+version="1.7.0"
 echo "
 ____________________________________________________________________________________
    oooo                                                                      
@@ -41,7 +41,8 @@ then
 root=$HOME/myHugoProject
 editor=nano
 mainbranch=main
-workingbranch=writting" > $configFile
+workingbranch=writting
+buildwebhook=" > $configFile
 fi
 
 # Setting editor. Nano is the default
@@ -52,6 +53,9 @@ then
     echo " * Edit $configFile and choose a working editing software"
     exit 1
 fi
+
+# Getting webhook URL from configfile
+build_webhook="$(grep build_webhook $configFile | cut -d = -f 2)"
 
 # Setting root directory and checking if it exists
 root="$(grep root $configFile | cut -d = -f 2)"
@@ -125,6 +129,23 @@ case $1 in
         echo -e "\n * [SUCCESS] Changes published"
     ;;
  
+##==========================================   
+# Send a build request through webhook 
+    build)
+        if [[ -z "$build_webhook" ]];
+	then
+	    echo " ! [ERROR] Webhook not set ! Edit config file"
+	    exit 1
+	fi
+	
+	curl -X POST \
+		-d 'trigger_title=Jameson_Trigger' \
+		-d 'trigger_branch=main' \
+		-d 'clear_cache=true' \
+		$build_webhook\
+	&& echo " * Trigger sent"\
+	|| echo " ! Trigger failled !"
+    ;;
  ##==========================================   
 # Import a picture into the project picture folder
 	# option : -k to keep source file
@@ -201,6 +222,7 @@ case $1 in
             git commit --quiet -m "imported images $outputFile"
             
         echo " * [SUCCESS] Images imported."
+        rm $curdir/$2 #remove sourcefile
         echo -n "/img/pictures/$yearmonth/$outputFile.webp" | xclip -sel clip 2>/dev/null && echo " * image location copied to clipboard" || echo " ! could not copy file path. Maybe install xclip ?"
     ;;
         
@@ -455,11 +477,12 @@ case $1 in
          - list <keyword>       : list posts. Filter by keyword (optionnal)
          
         Writting and content management tools
-         - import <imagefile>   : convert image to WEBP and import it to the image folder
+         - import <imagefile> [<name>]  : convert image to WEBP and import it to the image folder under <name>.webp if provided
          - save                 : save changes 
          - sync                 : pull and push branches to sync to origin
          - publish              : publish changes to main git branch
          - save publish         : save changes, then merges branch to main branch
+         - build		: send a POST request to configured webhook to trigger a build in compatible services
          "
     ;;
     
@@ -482,5 +505,5 @@ case $1 in
     ;;
 esac
 
-echo " ---bye---"
+# go back to user folder
 cd "$curdir"

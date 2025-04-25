@@ -16,7 +16,8 @@ import yaml, shlex, re
 from subprocess import run, DEVNULL
 from sys import argv
 
-import modules.gitwrapper, modules.hugowrapper
+import modules.gitwrapper as gitwrapper
+import modules.hugowrapper as hugowrapper
 from modules.MyModules import *
 
 # === CLASS IMPORT ===

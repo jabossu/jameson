@@ -4,6 +4,8 @@ the humble editing-helper for [Hugo](http://gohugo.io) static website generator.
 > Flowers? How much? If you spend any more on this thing, you can pick the daisies off my grave! Get plastic!
 > <cite>— J. Jonah Jameson, Spider-Man 2</cite>
 
+This version was rewritten in Python3.
+
 ## The Goal
 
 Jameson helps me manage my git branches and commits to write my blog created with hugo.
@@ -12,7 +14,7 @@ It's nothing much, just a simple bash script. Still, it gets out of the way and 
 
 ## How to use
 1. Place the shell script into your $PATH
-2. Make it executable : `$ chmod +x jameson.sh`
+2. Make it executable : `$ chmod +x jameson.py`
 3. Enjoy
 
 You can access the help using `$ jameson.sh help`

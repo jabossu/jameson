@@ -44,7 +44,7 @@ class post:
             elif '}' in str(self.metadatas[i]):
                 r += "{}:\n".format(i)
                 for k in self.metadatas[i]:
-                    r += ' {}: "{}"\n'.format(k.strip() ,self.metadatas[i][k]) 
+                    r += ' {}: "{}"\n'.format(k.strip() , self.metadatas[i][k]) 
             
             # the metadata is on one line 
             else:
@@ -69,7 +69,7 @@ class post:
         now = datetime.date.today().strftime('%Y-%m-%d')
         if self.metadatas['draft']:
             self.metadatas['date'] = now
-        else:
+        elif self.metadatas['date'] != now:
             self.metadatas['lastmod'] = now
             
         self.save()

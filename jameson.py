@@ -78,10 +78,29 @@ for i, argument in enumerate(argv):
        
         case "edit":
             
-            pl = post_list( filters )
-            # check how many post we got from filters.
-            # cannot be 0 as it was checked earlier.
-            num_posts = len( pl.list() )
+            # If there is another argument passed that is not an option flag 
+            # (option flag contain "-" : --all, -d...)
+            # assume the user is using a shortcut and giving us a title.
+            # Rebuild the filters accordingly and search from it.
+            try:
+                if '-' not in argv[i+1]:
+                    shortcut_mode = True
+                    filters.list.extend( 
+                            filter_list( ('-f', "title:{}".format(argv[i+1]) )).list
+                        ) # we add a new filter with title
+                else:
+                    shortcut_mode = False
+            except IndexError:
+                shortcut_mode = False
+            
+            pl = post_list( filters )   # exit(1) if 0 match
+            num_posts = len(pl.list())  # so it can only be >= 0
+            
+            if shortcut_mode and num_posts !=1:
+                # shortcut modes can only be used if there is one valid result
+                # it's to be used in graphical launchers
+                print('Too many posts match this title. Try again')
+                exit(1)            
             
             if num_posts == 1:
                 # if the is only one, we edit it.
@@ -121,6 +140,7 @@ for i, argument in enumerate(argv):
                     # the user wants to edit each and every file
                     for k, i in enumerate( pl.list() ):
                         try: # We'll catch a ctrl-C and exit.
+                            print_line()
                             print( '[{}/{}] Editing "{}"'.format(k+1, num_posts, i.metadatas['title']) )
                             i.edit() 
                         except KeyboardInterrupt:

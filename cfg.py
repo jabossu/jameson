@@ -39,8 +39,9 @@ if '-v' in argv:
 
 # check for dry-runs
 global dry_run
-dry_run = True
-print('👀', "Turning dry-run mode on. I'm in cfg.py line43")
+dry_run = False
+if dry_run:
+    print('👀', "Turning dry-run mode on by default. I'm in cfg.py line 42")
 for i in ('-n', '--no', '--dry-run'):
     if i in argv:
         dry_run = True

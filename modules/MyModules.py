@@ -33,10 +33,16 @@ def edit( filename ):
     command = shlex.split( cfg.v['editor'] )
     command.append( filename )
     
-    subprocess.run( 
-        command, cwd=cfg.v['root'], 
-        stderr=subprocess.DEVNULL )
-    gitwrapper.commit('Edited "{}"'.format(filename))
+    print("✏️ ", 'Opening "{}"'.format( filename ))
+    try:
+        subprocess.run( 
+            command, cwd=cfg.v['root'], 
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL)
+        gitwrapper.commit('Edited "{}"'.format(filename))
+    except KeyboardInterrupt:
+        print(" Quit")
+        exit(1)
 
 def convert_image( image_path, thumb=True ):
     """Take an image and convert it to WEBP. Resize it if thum is true"""

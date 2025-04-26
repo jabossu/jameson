@@ -22,9 +22,10 @@ def commit(message=None):
     for c in commands:
         echo( "Running command", shlex.split( c ) )
         
-        subprocess.run(
+        r = subprocess.run(
             shlex.split( c ),
-            cwd=cfg.v['root']
+            cwd=cfg.v['root'],
+            stdout=subprocess.PIPE
             )
             
 def push():
@@ -37,7 +38,7 @@ def push():
     
     commands = ('git checkout {}'.format(cfg.v['branch_main']),
                 'git merge {}'.format(cfg.v['branch_working']),
-                'git push {}'.format(d),
+                'git push origin --all {}'.format(d),
                 'git checkout {}'.format(cfg.v['branch_working'])
                 )
     

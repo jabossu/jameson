@@ -11,7 +11,7 @@ def fullpath(f):
 def normalize(s):
     """Takes a string, lower all letters, remove diacritics and return a normalized string"""
     r = unidecode(str(s).casefold()) 
-    regex = r"[^\w.-]+" 
+    regex = r"[^\w.]+" 
     r = re.sub( regex, "_", r )
     return(r)
     

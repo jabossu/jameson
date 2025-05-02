@@ -119,3 +119,83 @@ if error > 0:
     exit(1) # We exit, as config is not valid.
 else:
     echo('Valid config file {} loaded'.format(config_file.absolute()) )
+
+# ———————————————————————————————————————————————————————————————————————————
+# Help command
+def help():
+    print("""#===================
+Jameson, the fantastic editor for hugo blogging. 
+    
+# FILTERING
+#===================
+Jameson use filters to grant finer control on which post it should work on.
+Filters can be provided in any position of argument.
+Filters can be specified with "-f property:value"
+    Property can be :
+    - file      : to search from filenames
+    - content   : to search for the "value" in the content of a post
+    - other     : to search metadatas for a metadata name "other" that has the value "value".
+                  ie: tags:voyage, categories=opinion, date=2023-12-31 ...
+
+By default, only posts matching ALL filters will be returned. (--all)
+You can select all posts matching ANY filter by passing "--any" as an argument.
+
+
+# CONTENT MANAGEMENT
+#===================
+    new <title> :   create a new post with title.
+    
+    list        :   show a list of matching posts. Can be used with filters
+        
+    show        :   display extract of matching posts. can be used with filters.
+        
+    drafts      :   lists drafts. can be used with filters.
+       
+    edit        :   edit matching posts.
+                    use with filters for finer control.
+    
+    
+    metaedit    :   edit metadatas in bulk. Several modes of operation.
+                    several modes can be used at the same time.
+                    
+    metaedit <property+value> : add mode
+                    add "value" to the property. 
+                    Use in combination with filters for finer control
+                    WILL prompt user for confirmation before editing textfiles
+    metaedit <property-value> : remove mode
+                    remove "value" to the property. 
+                    Will only target posts that actually have this property and this value.
+                    Use in combination with more filters for finer control
+                    WILL prompt user for confirmation before editing textfiles
+    metaedit <property=value> : set mode
+                    Set property to "value".
+                    Use in combination with more filters for finer control
+                    WILL prompt user for confirmation before editing textfiles
+                    
+        
+    import  <path/to/img> :
+                    import image, converting it to WEBP format for reduced size
+                    and placing it into /static/img/pictures/YYYY-MM/image.webp.
+                    Also générates -thumb thumbnail
+                    Also strips exif metadatas for privacy
+                    Also removes sourcefile
+                    Also copy the filepath to clipboard
+            --keep | -k :
+                    Keep sourcefile, not removing it.
+
+
+        
+# VERSION MANAGEMENT
+#===================
+    save        :   use Git to commit changes
+    publish     :   use Git to push to remote
+    sync        :   use Git to pull & push from origin, syncing with remote repo.  
+
+# OTHER
+#===================
+    help        :   This help
+
+    config      :   print out config file values
+            -e  :   edit config file in editor
+
+""")

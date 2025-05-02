@@ -151,7 +151,75 @@ for i, argument in enumerate(argv):
                     pl.list()[choice-1].edit()
             # command completed, EXIT
             exit(0)
+        
+        case "metaedit":
+            # we want to edit/update/remove metadatas in bulk on filtered posts
             
+
+            
+            # Loop through arguments
+            new_metas = list()
+            for i in argv:
+                ## commands can be as follow :
+                #   jameson metaedit title="newtitle"   : set metadatas to new value
+                #   jameson metaedit tags+"newtag"      :   add metadatas value to a list
+                #                                           if not list, wee concatenate the strings
+                #                                           if None, we replace
+                #   jameson metaedit tags-"oldtag"      : remove metadata value from a list
+                    
+                regex = r"([\w ]+)([+=-])([\w ]*)"
+                try:
+                    r = re.search(regex, i)
+                    
+                    if isinstance(r, type(None)):
+                        raise KeyError
+                    
+                    key = r[1]
+                    value = r[3]
+                    match r[2]:
+                        case '+':
+                            mode = 'add'
+                        case '=':
+                            mode = 'set'
+                            filters.list.append( (key, value) )
+                        case '-':
+                            mode = 'remove'
+                            filters.list.append( (key, value) )
+                    
+                    print('✍️ ', 'Editing metadata : for [{}], {} "{}"'.format(
+                        key, mode, value
+                        ))
+                    
+                    new_metas.append( {'key': key, 'value':value, 'mode': mode} )
+                    
+                    
+                    
+                except KeyError:
+                    # if argument does not patch the pattern, do nothing
+                    pass
+            
+            ## We load posts to metaedit
+            pl = post_list( filters )
+            
+            # we now process the edits, WITHOUT saving them
+            for p in pl.list():
+                p.metaedit( new_metas ) 
+            
+            # Now we ask for user confirmation
+            try:
+                confirm = input('\n❓ Apply changes ? (yes/No) ').casefold()
+                while not confirm in ('yes', 'no') :
+                    confirm = input('Please answer with "yes" or "no" : ').casefold()
+            except KeyboardInterrupt:
+                print('\nQuit')
+                exit(1)
+            
+            if confirm == 'yes':
+                for p in pl.list():
+                    p.save()
+            
+            exit(0) # everything wen fine, we exit
+        
         case "import":
             if "-k" in argv or "--keep" in argv:
                 keep_sourcefile=True
@@ -187,3 +255,10 @@ for i, argument in enumerate(argv):
         case "sync":
             gitwrapper.sync()
             exit(0)
+        
+        case "help":
+            cfg.help()
+            exit(0)
+        
+print('No argument was recognised. Use "jameson help"')
+exit(1)
